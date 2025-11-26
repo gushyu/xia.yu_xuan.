@@ -2,8 +2,8 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>心形祝福弹窗</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>彩色霓虹爱心</title>
     <style>
         * {
             margin: 0;
@@ -12,269 +12,259 @@
         }
         
         body {
-            font-family: 'Microsoft YaHei', sans-serif;
-            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
-            height: 100vh;
+            background-color: #000;
             overflow: hidden;
+            width: 100vw;
+            height: 100vh;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            color: #333;
+            font-family: 'Microsoft YaHei', 'SimHei', Arial, sans-serif;
+            touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
         
-        .container {
+        #container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-width: 500px; /* 限制最大宽度，保持竖屏比例 */
+        }
+        
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .hint {
+            position: absolute;
+            bottom: 20px;
+            color: #666;
+            font-size: 14px;
+            text-align: center;
+            width: 100%;
+            pointer-events: none;
+        }
+        
+        /* 竖屏提示 */
+        @media (orientation: landscape) {
+            .orientation-warning {
+                display: flex;
+            }
+        }
+        
+        .orientation-warning {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 100;
             text-align: center;
             padding: 20px;
-            max-width: 600px;
-            background-color: rgba(255, 255, 255, 0.8);
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .orientation-warning p {
             margin-bottom: 20px;
-        }
-        
-        h1 {
-            color: #e91e63;
-            margin-bottom: 15px;
-            font-size: 2.2rem;
-        }
-        
-        p {
-            margin-bottom: 15px;
-            line-height: 1.6;
-        }
-        
-        .controls {
-            margin: 20px 0;
-        }
-        
-        button {
-            background: #e91e63;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 50px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(233, 30, 99, 0.3);
-            margin: 0 10px;
-        }
-        
-        button:hover {
-            background: #c2185b;
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(233, 30, 99, 0.4);
-        }
-        
-        .tip-box {
-            position: absolute;
-            width: 140px;
-            height: 70px;
-            border-radius: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            font-size: 14px;
-            padding: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            animation: fadeIn 0.5s ease, float 3s ease-in-out infinite;
-            z-index: 100;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-        }
-        
-        .tip-box:hover {
-            transform: scale(1.05);
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.8); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-        
-        .counter {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.8);
-            padding: 10px 15px;
-            border-radius: 20px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            font-weight: bold;
-            z-index: 1000;
-        }
-        
-        .footer {
-            margin-top: 20px;
-            font-size: 0.9rem;
-            color: #666;
+            font-size: 18px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>💖 心形祝福弹窗 💖</h1>
-        <p>点击下方按钮，屏幕上将出现心形排列的祝福消息！</p>
-        <p>每个消息框会显示5秒后自动消失，您也可以点击消息框手动关闭。</p>
-        
-        <div class="controls">
-            <button id="startBtn">开始显示祝福</button>
-            <button id="stopBtn">停止所有弹窗</button>
-        </div>
-        
-        <div class="footer">
-            <p>分享给朋友，传递温暖与祝福！</p>
-        </div>
+    <div id="container">
+        <canvas id="heartCanvas"></canvas>
+        <div class="hint">彩色霓虹爱心</div>
     </div>
     
-    <div class="counter" id="counter">已显示: 0 个祝福</div>
+    <div class="orientation-warning">
+        <p>请将手机旋转至竖屏模式</p>
+        <p>以获得最佳体验</p>
+    </div>
 
     <script>
-        // 祝福语数组
-        const tips = [
-            "保持好心情", "我想你了", "保持微笑", "天天都要元气满满", "别熬夜",
-            "记得吃水果", "好好吃饭", "多喝水", "每天都要开心", "保持你的纯真",
-            "你的微笑很特别", "要一直幸福哦", "想你的每一天", "照顾好自己", "记得想我",
-            "今天也要加油", "你是最棒的", "保持可爱", "万事胜意", "平安喜乐",
-            "一切都会好的", "相信自己", "你是独一无二的", "未来可期", "永远支持你"
+        // 获取Canvas元素和上下文
+        const canvas = document.getElementById('heartCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 设置Canvas尺寸为全屏
+        function resizeCanvas() {
+            const container = document.getElementById('container');
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        
+        // 文字数组
+        const WORDS = [
+            "我爱你", "I love you", "永远爱你", "Forever love", 
+            "想你", "Miss you", "抱抱", "Hug", "亲爱的", "Darling",
+            "心动了", "Heartbeat", "甜蜜", "Sweet", "幸福", "Happiness",
+            "缘分", "Destiny", "唯一", "Only one", "命中注定", "Meant to be",
+            "陪伴", "Company", "守护", "Guard", "珍惜", "Cherish"
         ];
         
-        // 颜色数组
-        const colors = [
-            "#FFB6C1", "#FFD700", "#98FB98", "#87CEEB", "#DDA0DD",
-            "#F0E68C", "#E0FFFF", "#FFA07A", "#AFEEEE", "#FFDEAD",
-            "#B0E0E6", "#FFC0CB", "#F5DEB3", "#D8BFD8", "#F0FFF0"
+        // 心形函数 - 恢复原始大小
+        function heart(t) {
+            const x = 16 * Math.pow(Math.sin(t), 3);
+            const y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+            // 恢复原始缩放因子14.3
+            return { x: x * 14.3, y: y * 14.3 };
+        }
+        
+        // 预计算心形点
+        const heartPoints = [];
+        for (let i = 0; i < 800; i++) {
+            const angle = i / 800 * Math.PI * 2;
+            const point = heart(angle);
+            heartPoints.push({
+                x: canvas.width/2 + point.x,
+                y: canvas.height/2 + point.y - 100 // 恢复原始偏移
+            });
+        }
+        
+        // 颜色模式
+        const colorModes = [
+            { hueBase: 0.0, hueRange: 0.3, speed: 0.05 },   // 红橙黄
+            { hueBase: 0.3, hueRange: 0.3, speed: 0.04 },   // 黄绿青
+            { hueBase: 0.6, hueRange: 0.3, speed: 0.06 },   // 青蓝紫
+            { hueBase: 0.8, hueRange: 0.4, speed: 0.03 },   // 紫红粉
         ];
         
-        let tipBoxes = [];
-        let intervalId = null;
-        let counter = 0;
-        const counterElement = document.getElementById('counter');
+        // 创建文字粒子
+        const particles = [];
+        for (let i = 0; i < 25; i++) { // 减少粒子数量以适应手机性能
+            const colorMode = colorModes[Math.floor(Math.random() * colorModes.length)];
+            particles.push({
+                word: WORDS[Math.floor(Math.random() * WORDS.length)],
+                offset: i * (800 / 25) + Math.random() * 30 - 15,
+                hueBase: colorMode.hueBase,
+                hueRange: colorMode.hueRange,
+                colorSpeed: colorMode.speed,
+                pulseSpeed: Math.random() * 0.03 + 0.02,
+                brightness: Math.random() * 0.3 + 0.7
+            });
+        }
         
-        // 生成心形轨迹上的点
-        function generateHeartPoints(numPoints) {
-            const points = [];
-            const centerX = window.innerWidth / 2;
-            const centerY = window.innerHeight / 2;
-            const scale = Math.min(window.innerWidth, window.innerHeight) / 20;
+        // HSV转RGB函数
+        function hsvToRgb(h, s, v) {
+            let r, g, b;
             
-            for (let i = 0; i < numPoints; i++) {
-                const t = i / numPoints * 2 * Math.PI;
-                const x = 16 * Math.pow(Math.sin(t), 3);
-                const y = 13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t);
-                
-                // 缩放和平移
-                const pointX = centerX + x * scale;
-                const pointY = centerY - y * scale; // 注意：网页坐标系Y轴向下为正
-                
-                points.push({x: pointX, y: pointY});
+            const i = Math.floor(h * 6);
+            const f = h * 6 - i;
+            const p = v * (1 - s);
+            const q = v * (1 - f * s);
+            const t = v * (1 - (1 - f) * s);
+            
+            switch (i % 6) {
+                case 0: r = v; g = t; b = p; break;
+                case 1: r = q; g = v; b = p; break;
+                case 2: r = p; g = v; b = t; break;
+                case 3: r = p; g = q; b = v; break;
+                case 4: r = t; g = p; b = v; break;
+                case 5: r = v; g = p; b = q; break;
             }
             
-            return points;
+            return {
+                r: Math.round(r * 255),
+                g: Math.round(g * 255),
+                b: Math.round(b * 255)
+            };
         }
         
-        // 创建祝福弹窗
-        function createTipBox(x, y) {
-            const tipBox = document.createElement('div');
-            tipBox.className = 'tip-box';
-            
-            // 随机颜色
-            const color = colors[Math.floor(Math.random() * colors.length)];
-            tipBox.style.backgroundColor = color;
-            
-            // 随机祝福语
-            const tip = tips[Math.floor(Math.random() * tips.length)];
-            tipBox.textContent = tip;
-            
-            // 设置位置
-            tipBox.style.left = `${x - 70}px`;
-            tipBox.style.top = `${y - 35}px`;
-            
-            // 添加到页面
-            document.body.appendChild(tipBox);
-            
-            // 点击关闭
-            tipBox.addEventListener('click', function() {
-                document.body.removeChild(tipBox);
-                const index = tipBoxes.indexOf(tipBox);
-                if (index > -1) {
-                    tipBoxes.splice(index, 1);
-                }
-            });
-            
-            // 5秒后自动消失
-            setTimeout(() => {
-                if (document.body.contains(tipBox)) {
-                    document.body.removeChild(tipBox);
-                    const index = tipBoxes.indexOf(tipBox);
-                    if (index > -1) {
-                        tipBoxes.splice(index, 1);
-                    }
-                }
-            }, 5000);
-            
-            tipBoxes.push(tipBox);
-            counter++;
-            counterElement.textContent = `已显示: ${counter} 个祝福`;
-            
-            return tipBox;
-        }
+        // 动画变量
+        let t = 0;
+        let animationId;
         
-        // 开始显示祝福弹窗
-        function startShowingTips() {
-            if (intervalId) return; // 防止重复启动
+        // 绘制函数
+        function draw() {
+            // 清屏
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            const numPoints = 30; // 弹窗数量
-            const points = generateHeartPoints(numPoints);
-            let currentIndex = 0;
+            // 减慢速度 - 减少t的增量
+            t += 0.4;
             
-            intervalId = setInterval(() => {
-                if (currentIndex >= points.length) {
-                    clearInterval(intervalId);
-                    intervalId = null;
-                    return;
+            // 绘制所有粒子
+            particles.forEach(p => {
+                const idx = Math.floor((t + p.offset) % 800);
+                const point = heartPoints[idx];
+                
+                // 计算彩色多元化的颜色
+                const hue = (p.hueBase + p.hueRange * Math.sin(t * p.colorSpeed)) % 1.0;
+                // 添加呼吸灯效果
+                const pulse = 0.2 + 0.8 * (0.5 + 0.5 * Math.sin(t * p.pulseSpeed));
+                // 最终颜色
+                const rgb = hsvToRgb(hue, 0.9, p.brightness * pulse);
+                const mainColor = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+                
+                // 根据主颜色生成发光效果的颜色
+                const glowColors = [];
+                for (let i = 0; i < 3; i++) {
+                    // 发光层使用略微不同的色调
+                    const glowHue = (hue + 0.02 * (i+1)) % 1.0;
+                    const glowRgb = hsvToRgb(glowHue, 0.7, 0.6 + 0.2*i);
+                    glowColors.push(`rgb(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b})`);
                 }
                 
-                const point = points[currentIndex];
-                createTipBox(point.x, point.y);
-                currentIndex++;
-            }, 300); // 每300毫秒显示一个弹窗
-        }
-        
-        // 停止所有弹窗
-        function stopAllTips() {
-            if (intervalId) {
-                clearInterval(intervalId);
-                intervalId = null;
-            }
-            
-            // 移除所有弹窗
-            tipBoxes.forEach(box => {
-                if (document.body.contains(box)) {
-                    document.body.removeChild(box);
-                }
+                // 设置字体 - 使用相对大小
+                const fontSize = Math.min(canvas.width, canvas.height) * 0.04;
+                ctx.font = `${fontSize}px "Microsoft YaHei", "SimHei", Arial, sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                
+                // 绘制发光效果
+                const glowLayers = [
+                    { size: 2, color: glowColors[0] },
+                    { size: 1, color: glowColors[1] },
+                    { size: 0, color: glowColors[2] }
+                ];
+                
+                glowLayers.forEach(layer => {
+                    ctx.fillStyle = layer.color;
+                    ctx.fillText(p.word, point.x + layer.size, point.y + layer.size);
+                    ctx.fillText(p.word, point.x - layer.size, point.y - layer.size);
+                });
+                
+                // 绘制主文字
+                ctx.fillStyle = mainColor;
+                ctx.fillText(p.word, point.x, point.y);
             });
             
-            tipBoxes = [];
+            // 继续动画
+            animationId = requestAnimationFrame(draw);
         }
         
-        // 绑定按钮事件
-        document.getElementById('startBtn').addEventListener('click', startShowingTips);
-        document.getElementById('stopBtn').addEventListener('click', stopAllTips);
+        // 开始动画
+        draw();
         
-        // 初始提示
-        setTimeout(() => {
-            const centerX = window.innerWidth / 2;
-            const centerY = window.innerHeight / 2;
-            createTipBox(centerX, centerY);
-        }, 1000);
+        // 处理窗口失去焦点时暂停动画
+        window.addEventListener('blur', function() {
+            cancelAnimationFrame(animationId);
+        });
+        
+        window.addEventListener('focus', function() {
+            if (!animationId) {
+                draw();
+            }
+        });
+        
+        // 阻止默认触摸行为（如下拉刷新）
+        document.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+        }, { passive: false });
     </script>
 </body>
 </html>
